@@ -80,51 +80,61 @@
     }
   
  func_4768_users<-function(data_frame,dates){
-   my_df<-0
+   my_list<-0
    file_users<-sapply(dates,function(x){unique(data_frame[(as.Date(substr(data_frame$Event.Time,1,10)) %like% x) &(nchar(data_frame$destinationUserName)<5)&!(data_frame$destinationUserName %like% "\\$%"),"destinationUserName"])})
    for (i in 1:length(dates)){
      r2<-cbind(rep(as.character.Date(dates[i]),as.integer(length(file_users[[i]]))),file_users[[i]])
-     if (my_df==0){my_df<-r2 }else{
-       my_df<-rbind(my_df,r2) }
+     if (class(my_list)=="numeric"){my_list<-list(r2) }else{
+       my_list<-c(my_list,list(r2)) }
       }
-   my_df<-data.frame(my_df,stringsAsFactors = FALSE)
-   colnames(my_df)<-c("date","user")
+   my_list
  }
    
     
-func_4768_src<-function(df_bs,df_usr){
-  df_src<-0
+func_4768_src<-function(df_bs,usr_lst){
+  src_lst<-0
+  
   r1<-1
-  for (i in 1:nrow(df_usr)){
-    src<-unique(substring(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% df_usr[i,"date"]) &(df_bs$destinationUserName %like% df_usr[i,"user"])),"deviceCustomString3" ],8))
-    if (length(src)==0){
-      src<-"10"
-    }
-    for (j in 1:length(src)){
-      if(!(src=="10")){
-        r1<-cbind(df_usr[i,"date"],df_usr[i,"user"],src[j])
+  for (i in 1:length(usr_lst)){
+        df_src<-0
+        for (j in 1:nrow(usr_lst[[i]])){
+        src<-unique(substring(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1]) &(df_bs$destinationUserName %like% usr_lst[[i]][j,2])),"deviceCustomString3" ],8))
+        if (length(src)==0){
+          src<-10
         }
-      if (df_src==0){
-        df_src<-r1 }else if(!(r1==1)) {
-            df_src<-merge(df_src,r1,all=TRUE) }
-    }
+            for (k in 1:length(src)){
+              if(!(class(src)=="numeric")){
+                r1<-cbind(usr_lst[[i]][j,1],usr_lst[[i]][j,2],src[k])
+                }
+              if (class(df_src)=="numeric"){
+                df_src<-r1 }else  {
+                    df_src<-merge(df_src,r1,all=TRUE) }
+            }
+        }
+  
+    df_src<-data.frame(cbind((as.character(df_src[,1])),(as.character(df_src[,2])),(as.character(df_src[,3]))),stringsAsFactors = FALSE)
+    colnames(df_src)<-c("date","user","src")
+    if (class(src_lst)=="numeric"){
+      src_lst<-list(df_src)}else {
+        src_lst<-c(src_lst,list(df_src))}
   }
   
-  df_src<-data.frame(df_src[,1:3],stringsAsFactors = FALSE)
-  colnames(df_src)<-c("date","user","src")
-  df_src
+  
+ src_lst
   
 }
     
 func_4768_file_list<-function(file_list){
-   file1_src<-cbind(date="2015-11-12",user="z001",src="10.0.0.0")
+   file1_src<-0
   for (i in 1:length(file_list)){
     file1<-read.csv(file_list[i],stringsAsFactors = FALSE)
     file1_base<-func_4768_file(file1)
     file1_dates<-func_4768_date(file1_base)
     file1_users<-func_4768_users(file1_base,file1_dates)
     file1_src_tmp<-func_4768_src(file1_base,file1_users)
-    file1_src<-merge(file1_src,file1_src_tmp,all = TRUE)
+    if (class(file1_src)=="numeric"){
+      file1_src<-file1_src_tmp}else {
+        file1_src<-c(file1_src,file1_src_tmp)}
     
   }
   file1_src
