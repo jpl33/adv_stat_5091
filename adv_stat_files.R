@@ -88,7 +88,7 @@
        my_df<-rbind(my_df,r2) }
       }
    my_df<-data.frame(my_df,stringsAsFactors = FALSE)
-   `colnames<-`(my_df,c("date","user"))
+   colnames(df_src)<-c("date","user")
  }
    
     
