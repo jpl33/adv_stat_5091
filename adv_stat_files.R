@@ -65,7 +65,7 @@
 # user_count<-sapply(seq_along(my_users),function(x){count(myfile[myfile$Final.User.Name %like% my_users[x],] ) } )
 # my_stats_14_11<-data_frame(my_users,user_count)
 # my_stats_14_11 <- data.frame(lapply(my_stats_14_11, as.character), stringsAsFactors=FALSE)
-# > write.csv(my_stats_14_11,"stats_14_11.csv",row.names = FALSE)
+#  write.csv(my_stats_14_11,"stats_14_11.csv",row.names = FALSE)
 
 #4768
 # my_4768<-my_4768[(nchar(my_4768$destinationUserName) <5) ,]
@@ -81,7 +81,7 @@
   
  func_4768_users<-function(data_frame,dates){
    my_list<-0
-   file_users<-sapply(dates,function(x){unique(data_frame[(as.Date(substr(data_frame$Event.Time,1,10)) %like% x) &(nchar(data_frame$destinationUserName)<5)&!(data_frame$destinationUserName %like% "\\$%"),"destinationUserName"])})
+   file_users<-sapply(dates,function(x){unique(data_frame[(as.Date(substr(data_frame$Event.Time,1,10)) %like% x)&(nchar(data_frame$destinationUserName)<5) &!(data_frame$destinationUserName %like% "\\$%")&(data_frame$destinationUserName %like% c("t%","u%","h%","z%")),"destinationUserName"])})
    for (i in 1:length(dates)){
      r2<-cbind(rep(as.character.Date(dates[i]),as.integer(length(file_users[[i]]))),file_users[[i]])
      if (class(my_list)=="numeric"){my_list<-list(r2) }else{
@@ -123,30 +123,62 @@ func_4768_src<-function(df_bs,usr_lst){
  src_lst
   
 }
+
+
+func_4768_list_merge<-function(list1,list2){
     
+    for (i in length(list2):1){
+          for(j in 1:length(list1)){
+            if (!(class(list2[[i]])=="numeric")){ 
+                if (list2[[i]][1,"date"]==list1[[j]][1,"date"]) {
+                   list1[[j]]<-merge(list1[[j]],list2[[i]],all=TRUE)
+                   list2[[i]]<-0}
+                  }
+               }
+          }
+  list1
+      }  
+    
+   
+
+
 func_4768_file_list<-function(file_list){
    file1_src<-0
   for (i in 1:length(file_list)){
     file1<-read.csv(file_list[i],stringsAsFactors = FALSE)
     file1_base<-func_4768_file(file1)
+    if (length(file1_base)>0){
     file1_dates<-func_4768_date(file1_base)
     file1_users<-func_4768_users(file1_base,file1_dates)
     file1_src_tmp<-func_4768_src(file1_base,file1_users)
     if (class(file1_src)=="numeric"){
       file1_src<-file1_src_tmp}else {
-        file1_src<-c(file1_src,file1_src_tmp)}
+        file1_src<-func_4768_list_merge(file1_src,file1_src_tmp)}
     
+       }
   }
   file1_src
 }
-func_4768<-function(){
+
+func_4768<-function(input_filter){
   library(DescTools)
     csv<-list.files(pattern= "*.csv")
-    csv<-grep("10_11*",csv,value = TRUE)
+    csv<-grep(input_filter,csv,value = TRUE)
     src<-func_4768_file_list(csv)
-      
-    src
+    trgt_files<-list.files(path="./output", pattern= "^[0-9]{4}-[0-9]{2}-[0-9]{2}")
+    trgt_dates<-substr(trgt_files,1,10)
+    for(i in 1:length(src)){
+      if(!(src[[i]][1,"date"] %in% trgt_dates)){
+          write.csv(src[[i]],paste("./output/",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
+      } else {
+          src11<-read.csv(paste("./output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
+          src11<-merge(src11,src[[i]],all=TRUE) 
+          write.csv(src11,paste("./output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),row.names = FALSE)
+       }
     }
+    lapply(csv,function(x){file.rename(x,paste("processed_",x,sep=""))})
+    src
+  }
 
 #   func_4768_user<-function(dataframe,dt,user){
 #       func_4768_user<-function(dt,user,df){
