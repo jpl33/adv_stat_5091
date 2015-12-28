@@ -165,11 +165,11 @@ func_4768<-function(input_filter){
     csv<-list.files(pattern= "*.csv")
     csv<-grep(input_filter,csv,value = TRUE)
     src<-func_4768_file_list(csv)
-    trgt_files<-list.files(path="./output", pattern= "^[0-9]{4}-[0-9]{2}-[0-9]{2}")
-    trgt_dates<-substr(trgt_files,1,10)
+    trgt_files<-list.files(path="./output", pattern= "^[0-9]{4}_[0-9]{4}-[0-9]{2}-[0-9]{2}")
+    trgt_dates<-substr(trgt_files,6,15)
     for(i in 1:length(src)){
       if(!(src[[i]][1,"date"] %in% trgt_dates)){
-          write.csv(src[[i]],paste("./output/",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
+          write.csv(src[[i]],paste("./output/4768_",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
       } else {
           src11<-read.csv(paste("./output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
           src11<-merge(src11,src[[i]],all=TRUE) 
