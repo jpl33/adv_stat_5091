@@ -147,7 +147,7 @@ func_4768_file_list<-function(file_list){
   for (i in 1:length(file_list)){
     file1<-read.csv(file_list[i],stringsAsFactors = FALSE)
     file1_base<-func_4768_file(file1)
-    if (length(file1_base)>0){
+    if (nrow(file1_base)>0){
     file1_dates<-func_4768_date(file1_base)
     file1_users<-func_4768_users(file1_base,file1_dates)
     file1_src_tmp<-func_4768_src(file1_base,file1_users)
