@@ -182,17 +182,32 @@
 #     
 #     src
 # }
- split_files<-function(){
- csv<-list.files(pattern= "*.csv")
+ split_files<-function(pattern){
+   library(NCmisc)
+  #csv<-list.files(pattern= "*.csv")
+ csv<-list.files(pattern= pattern)
  csv_srt<-sapply(csv,function(x){file.split(x,size=100000)})
  input_filter<-"part[0-9]{1,2}.csv$"
  file_list<-list.files(pattern= input_filter)
- input_filter_old<-"^[0-9]\\w+00.csv$"
+ first_file<-file_list[1]
+ column_names<-read.csv(first_file,nrows = 1)
+ header_line<-function(x){
+   write.csv(column_names,"column_names.csv",row.names = FALSE)
+   file.append("column_names.csv",x)
+   file.rename("column_names.csv",x)}
+ sapply(file_list,header_line)
+ input_filter_old<-"^[0-9]\\w+[0-9]{2}.csv$"
  file_list_old<-list.files(pattern= input_filter_old)
  l1<-paste(file_list_old,collapse = " ")
  c1<-paste('"C:\\Program Files\\WinRAR\\rar.exe\"',"a","old_files.rar",l1)
  shell(c1)
  }
+ 
+#  file 15_11_13_47_to_16_11_01_47.csv  size: 506 MB
+#  split_files: 63.8 Second
+#  func_4768: 55 Second
+#  total : 119 Second
+#   func_4768 whole file:  161 seconds
  
 # func_4625_file<-function(dataframe){
 #   df_base<-dataframe[dataframe$deviceEventClassId %like% "%4625",]

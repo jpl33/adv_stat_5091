@@ -7,7 +7,7 @@ func_4625_date<-function(dataframe){
 
 func_4625_users<-function(data_frame,dates){
   my_list<-0
-  file_users<-sapply(dates,function(x){unique(data_frame[(as.Date(substr(data_frame$Event.Time,1,10)) %like% x)&(nchar(data_frame$destinationUserName)<5) &!(data_frame$destinationUserName %like% "\\$%")&(data_frame$destinationUserName %like% c("t%","u%","h%","z%")),"destinationUserName"])})
+  file_users<-lapply(dates,function(x){unique(data_frame[(as.Date(substr(data_frame$Event.Time,1,10)) %like% x)&(nchar(data_frame$destinationUserName)<5) &!(data_frame$destinationUserName %like% "\\$%")&(data_frame$destinationUserName %like% c("t%","u%","h%","z%")),"destinationUserName"])})
   for (i in 1:length(dates)){
     if (!length(file_users[[i]])==0){
           r2<-cbind(rep(as.character.Date(dates[i]),as.integer(length(file_users[[i]]))),file_users[[i]])
@@ -84,7 +84,7 @@ func_4625_file_list<-function(file_list){
           file1_src<-func_4625_list_merge(file1_src,file1_src_tmp)}
       
     }
-    file.rename(file_list[i],paste("./processed/",file_list[i],sep=""))
+    file.rename(file_list[i],paste("../processed/",file_list[i],sep=""))
   }
   file1_src
 }
@@ -94,15 +94,15 @@ func_4625<-function(input_filter){
   csv<-list.files(pattern= "*.csv")
   csv<-grep(input_filter,csv,value = TRUE)
   src<-func_4625_file_list(csv)
-  trgt_files<-list.files(path="./output", pattern= "^4625_[0-9]{4}-[0-9]{2}-[0-9]{2}")
+  trgt_files<-list.files(path="../output", pattern= "^4625_[0-9]{4}-[0-9]{2}-[0-9]{2}")
   trgt_dates<-substr(trgt_files,6,15)
   for(i in 1:length(src)){
     if(!(src[[i]][1,"date"] %in% trgt_dates)){
-      write.csv(src[[i]],paste("./output/4625_",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
+      write.csv(src[[i]],paste("../output/4625_",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
     } else {
-      src11<-read.csv(paste("./output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
+      src11<-read.csv(paste("../output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
       src11<-merge(src11,src[[i]],all=TRUE) 
-      write.csv(src11,paste("./output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),row.names = FALSE)
+      write.csv(src11,paste("../output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),row.names = FALSE)
     }
   }
   
