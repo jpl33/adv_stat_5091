@@ -34,7 +34,9 @@ func_4769_src<-function(df_bs,usr_lst){
   for (i in 1:length(usr_lst)){
     df_src<-0
     for (j in 1:nrow(usr_lst[[i]])){
-      src<-unique(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1]) &(df_bs$destinationUserName %like% paste0(usr_lst[[i]][j,2],"%"))&df_bs$destinationServiceName %like% "%\\$"),c("destinationServiceName" ,"deviceCustomString3")])
+      src<-unique(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1]) &
+                            (df_bs$destinationUserName %like% paste0(usr_lst[[i]][j,2],"%"))&
+                            df_bs$destinationServiceName %like% "%\\$"),c("destinationServiceName" ,"deviceCustomString3")])
       if (length(src)==0){
         src<-10
       }
