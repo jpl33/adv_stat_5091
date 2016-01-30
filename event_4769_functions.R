@@ -35,18 +35,24 @@ func_4769_src<-function(df_bs,usr_lst){
     df_src<-0
     for (j in 1:nrow(usr_lst[[i]])){
       src<-unique(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1]) &
-                            (df_bs$destinationUserName %like% paste0(usr_lst[[i]][j,2],"%"))&
-                            df_bs$destinationServiceName %like% "%\\$"),c("destinationServiceName" ,"deviceCustomString3")])
-      if (length(src)==0){
+                            (df_bs$destinationUserName %like% paste0(usr_lst[[i]][j,2],"%"))
+                          &! (df_bs$destinationServiceName %like% "krbtgt%"))
+                         ,c("destinationServiceName" ,"deviceCustomString3")])
+                         
+                         
+      if (length(src[[1]])==0){
         src<-10
       }
-      for (k in 1:nrow(src)){
+     
         if(!(class(src)=="numeric")){
-          r1<-cbind(usr_lst[[i]][j,1],usr_lst[[i]][j,2],src[k,1],substring(src[k,2],8))
-        }
-        if (class(df_src)=="numeric"){
-          df_src<-r1 }else  {
-            df_src<-merge(df_src,r1,all=TRUE) }
+          for (k in 1:nrow(src)){
+            r1<-cbind(usr_lst[[i]][j,1],usr_lst[[i]][j,2],src[k,1],substring(src[k,2],8))
+            if (!(is.na(r1[,4])&is.na(r1[,3]))){
+                if (class(df_src)=="numeric"){
+                  df_src<-r1 }else  {
+                    df_src<-merge(df_src,r1,all=TRUE) }
+              }
+          }
       }
     }
     
@@ -63,58 +69,48 @@ func_4769_src<-function(df_bs,usr_lst){
 }
 
 
-func_4769_list_merge<-function(list1,list2){
+
+
+func_4769_file_src<-function(file_nm){
+  file1_src<-0
+  file1<-read.csv(file_nm,stringsAsFactors = FALSE)
+  file1_base<-func_4769_file(file1)
+  if (nrow(file1_base)>0){
+    file1_dates<-func_4769_date(file1_base)
+    file1_users<-func_4769_users(file1_base,file1_dates)
+    file1_src<-func_4769_src(file1_base,file1_users)
+  }
   
-  for (i in length(list2):1){
-    for(j in 1:length(list1)){
-      if (!(class(list2[[i]])=="numeric")){ 
-        if (list2[[i]][1,"date"]==list1[[j]][1,"date"]) {
-          list1[[j]]<-merge(list1[[j]],list2[[i]],all=TRUE)
-          list2[[i]]<-0}
-      }
-    }
-  }
-  list1
-}  
-
-
-
-
-func_4769_file_list<-function(file_list){
-    file1_src<-0
-  for (i in 1:length(file_list)){
-    file1<-read.csv(file_list[i],stringsAsFactors = FALSE)
-    file1_base<-func_4769_file(file1)
-    if (nrow(file1_base)>0){
-      file1_dates<-func_4769_date(file1_base)
-      file1_users<-func_4769_users(file1_base,file1_dates)
-      file1_src_tmp<-func_4769_src(file1_base,file1_users)
-      if (class(file1_src)=="numeric"){
-        file1_src<-file1_src_tmp}else {
-          file1_src<-func_4769_list_merge(file1_src,file1_src_tmp)}
-      
-    }
-    file.rename(file_list[i],paste("../processed/",file_list[i],sep=""))
-  }
   file1_src
+}
+
+
+func_4769_output<-function(src_lst,file_nm){
+  trgt_files<-list.files(path="../output", pattern= "^4769_[0-9]{4}-[0-9]{2}-[0-9]{2}")
+  trgt_dates<-substr(trgt_files,6,15)
+  for(i in 1:length(src_lst)){
+    if(!(src_lst[[i]][1,"date"] %in% trgt_dates)){
+      write.csv(src_lst[[i]],paste("../output/4769_",src_lst[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
+    } else {
+      src11<-read.csv(paste("../output/",trgt_files[match(src_lst[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
+      src11<-merge(src11,src_lst[[i]],all=TRUE) 
+      write.csv(src11,paste("../output/",trgt_files[match(src_lst[[i]][1,"date"],trgt_dates)],sep=""),row.names = FALSE)
+    }
+  }
+  file.rename(file_nm,paste("../processed/",file_nm,sep=""))
 }
 
 func_4769<-function(input_filter){
   library(DescTools)
   csv<-list.files(pattern= "*.csv")
   csv<-grep(input_filter,csv,value = TRUE)
-  src<-func_4769_file_list(csv)
-  trgt_files<-list.files(path="../output", pattern= "^4769_[0-9]{4}-[0-9]{2}-[0-9]{2}")
-  trgt_dates<-substr(trgt_files,6,15)
-  for(i in 1:length(src)){
-    if(!(src[[i]][1,"date"] %in% trgt_dates)){
-      write.csv(src[[i]],paste("../output/4769_",src[[i]][1,"date"],".csv",sep = ""),row.names = FALSE)
-    } else {
-      src11<-read.csv(paste("../output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),stringsAsFactors = FALSE)
-      src11<-merge(src11,src[[i]],all=TRUE) 
-      write.csv(src11,paste("../output/",trgt_files[match(src[[i]][1,"date"],trgt_dates)],sep=""),row.names = FALSE)
-    }
+  for (i in 1:length(csv)){
+    src<-func_4769_file_src(csv[i])
+    if (!(class(src)=="numeric")){
+      func_4769_output(src,csv[i])}
   }
-  
-  src
 }
+
+
+
+
