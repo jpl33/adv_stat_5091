@@ -33,6 +33,7 @@ func_4769_src<-function(df_bs,usr_lst){
   uv<-regmatches(df_bs$destinationUserName,regexpr("^[^@]+",df_bs$destinationUserName))
   for (i in 1:length(usr_lst)){
     df_src<-0
+    
     for (j in 1:nrow(usr_lst[[i]])){
       src<-unique(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1]) &
                             (df_bs$destinationUserName %like% paste0(usr_lst[[i]][j,2],"%"))
@@ -56,13 +57,14 @@ func_4769_src<-function(df_bs,usr_lst){
       }
     }
     
+    if(!(df_src==0)){
     df_src<-data.frame(cbind((as.character(df_src[,1])),(as.character(df_src[,2])),(as.character(df_src[,3])),(as.character(df_src[,4]))),stringsAsFactors = FALSE)
     colnames(df_src)<-c("date","user","dst","src")
     if (class(src_lst)=="numeric"){
       src_lst<-list(df_src)}else {
         src_lst<-c(src_lst,list(df_src))}
+    }
   }
-  
   
   src_lst
   
@@ -73,12 +75,15 @@ func_4769_src<-function(df_bs,usr_lst){
 
 func_4769_file_src<-function(file_nm){
   file1_src<-0
+  logf<-read.csv("file1.log",stringsAsFactors = FALSE)
   file1<-read.csv(file_nm,stringsAsFactors = FALSE)
   file1_base<-func_4769_file(file1)
   if (nrow(file1_base)>0){
     file1_dates<-func_4769_date(file1_base)
     file1_users<-func_4769_users(file1_base,file1_dates)
     file1_src<-func_4769_src(file1_base,file1_users)
+ #   st<-system.time(file1_src<-func_4769_src(file1_base,file1_users))
+    
   }
   
   file1_src
