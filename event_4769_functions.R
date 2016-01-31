@@ -30,7 +30,7 @@ func_4769_users<-function(data_frame,dates){
 func_4769_src<-function(df_bs,usr_lst){
   src_lst<-0
   r1<-1
-  uv<-regmatches(df_bs$destinationUserName,regexpr("^[^@]+",df_bs$destinationUserName))
+  #uv<-regmatches(df_bs$destinationUserName,regexpr("^[^@]+",df_bs$destinationUserName))
   for (i in 1:length(usr_lst)){
     df_src<-0
     
@@ -75,15 +75,22 @@ func_4769_src<-function(df_bs,usr_lst){
 
 func_4769_file_src<-function(file_nm){
   file1_src<-0
-  logf<-read.csv("file1.log",stringsAsFactors = FALSE)
+  require(parallel)
+  
+  
+  logf<-file("file1.log","at")
   file1<-read.csv(file_nm,stringsAsFactors = FALSE)
   file1_base<-func_4769_file(file1)
   if (nrow(file1_base)>0){
     file1_dates<-func_4769_date(file1_base)
     file1_users<-func_4769_users(file1_base,file1_dates)
-    file1_src<-func_4769_src(file1_base,file1_users)
- #   st<-system.time(file1_src<-func_4769_src(file1_base,file1_users))
+   # file1_src<-func_4769_src(file1_base,file1_users)
+    st<-system.time(file1_src<-func_4769_src(file1_base,file1_users))
     
+    
+    
+    writeLines(paste(file_nm,"4769",st[3],sep=","),logf) 
+   close(logf)
   }
   
   file1_src

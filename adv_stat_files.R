@@ -66,7 +66,7 @@
  csv<-list.files(pattern= pattern)
  csv_srt<-sapply(csv,function(x){file.split(x,size=100000)})
  input_filter<-"part[0-9]{1,2}.csv$"
- file_list<-list.files(pattern= input_filter)
+ file_list<-list.files(pattern= paste0(pattern,"\\w+",input_filter))
  first_file<-file_list[1]
  column_names<-read.csv(first_file,nrows = 1)
  header_line<-function(x){
@@ -74,12 +74,13 @@
    file.append("column_names.csv",x)
    file.rename("column_names.csv",x)}
  sapply(file_list,header_line)
- input_filter_old<-"^[0-9]\\w+[0-9]{2}.csv$"
- file_list_old<-list.files(pattern= input_filter_old)
- l1<-paste(file_list_old,collapse = " ")
+ #input_filter_old<-"^[0-9]\\w+[0-9]{2}.csv$"
+ #file_list_old<-list.files(path=getwd(),pattern= pattern)
+ l1<-paste(csv,collapse = " ")
  c1<-paste('"C:\\Program Files\\WinRAR\\rar.exe\"',"a","old_files.rar",l1)
  shell(c1)
-file.remove(l1)
+ sapply(csv, function(x){file.remove(paste0(getwd(),"/",x))})
+      
  }
  
 
