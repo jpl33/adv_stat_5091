@@ -22,7 +22,6 @@ func_4624_users<-function(data_frame,dates){
 func_4624_src<-function(df_bs,usr_lst){
   src_lst<-0
   
-  r1<-1
   for (i in 1:length(usr_lst)){
     df_src<-0
     for (j in 1:nrow(usr_lst[[i]])){
@@ -35,12 +34,15 @@ func_4624_src<-function(df_bs,usr_lst){
       }
       if(!(class(src)=="numeric")){
           for (k in 1:length(src)){
+            r1<-0
             r1<-cbind(usr_lst[[i]][j,1],usr_lst[[i]][j,2],regmatches(src[k],regexpr("^[^\\.]+",src[k])))
-                if (class(df_src)=="numeric"){
-                    df_src<-r1 }else  {
-                      df_src<-merge(df_src,r1,all=TRUE) }
-              
-          }
+                if (!(ncol(r1)<3)){
+                       if (class(df_src)=="numeric"){
+                        df_src<-r1 }else  {
+                          df_src<-merge(df_src,r1,all=TRUE) }
+                  
+                }
+            }
       }
     }
 
