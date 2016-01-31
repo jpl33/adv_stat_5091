@@ -26,7 +26,7 @@ func_4625_src<-function(df_bs,usr_lst){
   for (i in 1:length(usr_lst)){
     df_src<-0
     for (j in 1:nrow(usr_lst[[i]])){
-      if (usr_lst[[i]][j,2]=="h001"){browser()}
+      
       src<-unique(df_bs[ ((as.Date(substr(df_bs[,"Event.Time"],1,10),"%Y/%m/%d") %like% usr_lst[[i]][j,1])
                           &(df_bs$destinationUserName %like% usr_lst[[i]][j,2]))
                          &df_bs$deviceCustomString5 %like% "NTLM"
@@ -69,7 +69,8 @@ func_4625_file_src<-function(file_nm){
   if (nrow(file1_base)>0){
     file1_dates<-func_4625_date(file1_base)
     file1_users<-func_4625_users(file1_base,file1_dates)
-    file1_src<-func_4625_src(file1_base,file1_users)
+    if(!class(file1_users)=="numeric"){    
+      file1_src<-func_4625_src(file1_base,file1_users)}
   }
   
   file1_src

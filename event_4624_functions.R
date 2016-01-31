@@ -36,7 +36,8 @@ func_4624_src<-function(df_bs,usr_lst){
           for (k in 1:length(src)){
             r1<-0
             r1<-cbind(usr_lst[[i]][j,1],usr_lst[[i]][j,2],regmatches(src[k],regexpr("^[^\\.]+",src[k])))
-                if (!(ncol(r1)<3)){
+            if(ncol(r1)<3){browser()}    
+            if (!(ncol(r1)<3)){
                        if (class(df_src)=="numeric"){
                         df_src<-r1 }else  {
                           df_src<-merge(df_src,r1,all=TRUE) }
