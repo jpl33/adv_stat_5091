@@ -73,7 +73,9 @@ func_4624_file_src<-function(file_nm){
     if (nrow(file1_base)>0){
       file1_dates<-func_4624_date(file1_base)
       file1_users<-func_4624_users(file1_base,file1_dates)
-      file1_src<-func_4624_src(file1_base,file1_users)
+      if(!class(file1_users)=="numeric"){
+      file1_src<-func_4624_src(file1_base,file1_users)}
+      
       }
     
   file1_src
